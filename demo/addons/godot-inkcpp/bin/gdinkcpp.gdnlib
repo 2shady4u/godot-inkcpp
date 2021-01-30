@@ -7,7 +7,7 @@ reloadable=false
 
 [entry]
 
-Windows.64="res://addons/godot-inkcpp/bin/win64/gdinkcpp.dll"
+Windows.64="res://addons/godot-inkcpp/bin/win64/libgdinkcpp.dll"
 
 [dependencies]
 
