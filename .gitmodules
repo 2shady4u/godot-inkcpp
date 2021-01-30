@@ -1,0 +1,6 @@
+[submodule "godot-cpp"]
+	path = godot-cpp
+	url = https://github.com/godotengine/godot-cpp.git
+[submodule "inkcpp"]
+	path = inkcpp
+	url = https://github.com/brwarner/inkcpp.git
