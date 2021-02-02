@@ -17,13 +17,11 @@ else:
     def decode_utf8(x):
         return codecs.utf_8_decode(x)[0]
 
-# Workaround for MinGW. See:
-# http://www.scons.org/wiki/LongCmdLinesOnWin32
+# Workaround for MinGW. See: http://www.scons.org/wiki/LongCmdLinesOnWin32
 if (os.name=="nt"):
     import subprocess
 
     def mySubProcess(cmdline,env):
-        #print "SPAWNED : " + cmdline
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -316,15 +314,15 @@ elif env['platform'] == 'windows':
 #####################
 
 env.Append(CPPPATH=[
-'.', 
-'inkcpp/shared/public/', 
-'inkcpp/shared/private/',
-'inkcpp/inkcpp/include/', 
-'inkcpp/inkcpp_compiler/include/', 
-godot_headers_path, 
-cpp_bindings_path + 'include/', 
-cpp_bindings_path + 'include/core/', 
-cpp_bindings_path + 'include/gen/'
+    '.', 
+    'inkcpp/shared/public/', 
+    'inkcpp/shared/private/',
+    'inkcpp/inkcpp/include/', 
+    'inkcpp/inkcpp_compiler/include/', 
+    godot_headers_path, 
+    cpp_bindings_path + 'include/', 
+    cpp_bindings_path + 'include/core/', 
+    cpp_bindings_path + 'include/gen/'
 ])
 
 #####################
@@ -333,12 +331,12 @@ cpp_bindings_path + 'include/gen/'
 
 inkcpp_env = env.Clone()
 inkcpp_sources = [Glob('inkcpp/inkcpp/*.cpp')]
-inkcpp_library = inkcpp_env.Library('inkcpp', source=inkcpp_sources)
+inkcpp_library = inkcpp_env.Library(target=env['target_path'] + 'libinkcpp', source=inkcpp_sources)
 
 inkcpp_compiler_env = env.Clone()
 inkcpp_compiler_env.Append(CPPDEFINES=['INK_COMPILER', 'INK_EXPOSE_JSON'])
 inkcpp_compiler_sources = [Glob('inkcpp/inkcpp_compiler/*.cpp')]
-inkcpp_compiler_library = inkcpp_compiler_env.Library('inkcpp_compiler', source=inkcpp_compiler_sources)
+inkcpp_compiler_library = inkcpp_compiler_env.Library(target=env['target_path'] + 'libinkcpp_compiler', source=inkcpp_compiler_sources)
 
 cpp_bindings_libname = 'libgodot-cpp.{}.{}.{}'.format(
                         env['platform'],
@@ -346,14 +344,18 @@ cpp_bindings_libname = 'libgodot-cpp.{}.{}.{}'.format(
                         arch_suffix)
 
 env.Append(LIBS=[
-    cpp_bindings_path + 'bin/' + cpp_bindings_libname,
-    'inkcpp',
-    'inkcpp_compiler'
+    cpp_bindings_libname,
+    'libinkcpp',
+    'libinkcpp_compiler'
 ])
+env.Append(LIBPATH=[env['target_path'], cpp_bindings_path + 'bin/'])
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=['src/'])
-sources = [Glob('src/*.cpp')]
+sources = [
+    'src/gdinkcpp.cpp',
+    'src/library.cpp'
+]
 
 ###############
 #BUILD LIB#####
