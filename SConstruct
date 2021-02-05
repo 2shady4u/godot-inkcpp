@@ -169,7 +169,7 @@ if host_platform == 'windows':
     if env['bits'] == '64':
         env = Environment(TARGET_ARCH='amd64')
     elif env['bits'] == '32':
-         env = Environment(TARGET_ARCH='x86')
+        env = Environment(TARGET_ARCH='x86')
     opts.Update(env)
 
 if env['bits'] == 'default':
@@ -194,7 +194,8 @@ if env['platform'] == 'linux':
     if env['target'] == 'debug':
         env.Append(CCFLAGS = ['-g3','-Og'])
     elif env['target'] == 'release':
-        env.Append(CCFLAGS = ['-g','-O3'])
+        env.Append(CCFLAGS = ['-O3'])
+        env.Append(LINKFLAGS = ['-s'])
 
     if env['bits'] == '64':
         env.Append(CCFLAGS=['-m64'])
