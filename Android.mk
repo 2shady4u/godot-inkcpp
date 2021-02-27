@@ -59,7 +59,7 @@ inkcpp/shared/public/ \
 inkcpp/shared/private/ \
 inkcpp/inkcpp/include/ \
 inkcpp/inkcpp_compiler/include/ \
-godot-cpp/godot_headers \
+godot-cpp/godot-headers \
 godot-cpp/include/ \
 godot-cpp/include/core \
 godot-cpp/include/gen \
