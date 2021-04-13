@@ -85,7 +85,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows', 'ios'),
+    allowed_values=('linux', 'osx', 'windows', 'ios', 'javascript'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -178,6 +178,8 @@ if env['bits'] == 'default':
 arch_suffix = env['bits']
 if env['platform'] == 'ios':
     arch_suffix = env['ios_arch']
+if env['platform'] == 'javascript':
+    arch_suffix = 'wasm'
 
 ###################
 ####FLAGS##########
@@ -310,6 +312,35 @@ elif env['platform'] == 'windows':
             '-static-libstdc++',
         ])
 
+elif env["platform"] == "javascript":
+    env["ENV"] = os.environ
+    env["CC"] = "emcc"
+    env["CXX"] = "em++"
+    env["AR"] = "emar"
+    env["RANLIB"] = "emranlib"
+    env.Append(CPPFLAGS=["-s", "SIDE_MODULE=1"])
+    env.Append(LINKFLAGS=["-s", "SIDE_MODULE=1"])
+    env["SHOBJSUFFIX"] = ".bc"
+    env["SHLIBSUFFIX"] = ".wasm"
+    # Use TempFileMunge since some AR invocations are too long for cmd.exe.
+    # Use POSIX-style paths, required with TempFileMunge.
+    env["ARCOM_POSIX"] = env["ARCOM"].replace("$TARGET", "$TARGET.posix").replace("$SOURCES", "$SOURCES.posix")
+    env["ARCOM"] = "${TEMPFILE(ARCOM_POSIX)}"
+
+    # All intermediate files are just LLVM bitcode.
+    env["OBJPREFIX"] = ""
+    env["OBJSUFFIX"] = ".bc"
+    env["PROGPREFIX"] = ""
+    # Program() output consists of multiple files, so specify suffixes manually at builder.
+    env["PROGSUFFIX"] = ""
+    env["LIBPREFIX"] = "lib"
+    env["LIBSUFFIX"] = ".bc"
+    env["LIBPREFIXES"] = ["$LIBPREFIX"]
+    env["LIBSUFFIXES"] = ["$LIBSUFFIX"]
+    env.Replace(SHLINKFLAGS='$LINKFLAGS')
+    env.Replace(SHLINKFLAGS='$LINKFLAGS')
+    env['STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME']=1
+
 #####################
 #ADD SOURCES#########
 #####################
@@ -344,12 +375,13 @@ cpp_bindings_libname = 'libgodot-cpp.{}.{}.{}'.format(
                         env['target'],
                         arch_suffix)
 
-env.Append(LIBS=[
-    cpp_bindings_libname,
-    'libinkcpp',
-    'libinkcpp_compiler'
-])
-env.Append(LIBPATH=[env['target_path'], cpp_bindings_path + 'bin/'])
+if env['platform'] != "javascript":
+    env.Append(LIBS=[
+        cpp_bindings_libname,
+        'libinkcpp',
+        'libinkcpp_compiler'
+    ])
+    env.Append(LIBPATH=[env['target_path'], cpp_bindings_path + 'bin/'])
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=['src/'])
@@ -357,6 +389,10 @@ sources = [
     'src/gdinkcpp.cpp',
     'src/library.cpp'
 ]
+if env['platform'] == "javascript":
+    sources.append(cpp_bindings_path + 'bin/' + cpp_bindings_libname + '.bc')
+    sources.append('libinkcpp.bc')
+    sources.append('libinkcpp_compiler.bc')
 
 ###############
 #BUILD LIB#####
