@@ -391,8 +391,8 @@ sources = [
 ]
 if env['platform'] == "javascript":
     sources.append(cpp_bindings_path + 'bin/' + cpp_bindings_libname + '.bc')
-    sources.append('libinkcpp.bc')
-    sources.append('libinkcpp_compiler.bc')
+    sources.append(env['target_path'] + 'libinkcpp.bc')
+    sources.append(env['target_path'] + 'libinkcpp_compiler.bc')
 
 ###############
 #BUILD LIB#####
